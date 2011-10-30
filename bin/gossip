@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+$: << File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+
+require 'rubygems'
+require 'logger'
+require 'optparse'
+require 'readline'
+require 'rgossip2'
+
+options = {:auth_key => 'onion'}
+
+ARGV.options do |opt|
+  opt.on('-i', '--initial-nodes=VAL') {|v| options[:initial_nodes] = (v || '').split(/\s*,\s*/) }
+  opt.on('-a', '--address=VAL')       {|v| options[:address] = v }
+  opt.on('-d', '--data=VAL')          {|v| options[:data] = v }
+  opt.on('-k', '--auth-key=VAL')      {|v| options[:auth_key] = v }
+  opt.parse!
+end
+
+$stdout.sync = true
+$stderr.sync = true
+
+gossip = RGossip2.client(options)
+
+commands = %w(start stop status list data add del clear logger exit)
+Readline.completion_proc = proc {|word| commands.grep(/\A#{Regexp.quote word}/) }
+
+while cmd = Readline.readline('gossip> ', true)
+  case cmd
+  when /\A\s*start\s*\Z/i
+    gossip.start
+  when /\A\s*stop\s*\Z/i
+    gossip.stop
+  when /\A\s*status\s*\Z/i
+    puts "running=#{gossip.running?}"
+  when /\A\s*list\s*\Z/i
+      puts <<-EOS
+IP Address       Timestamp                   Data
+---------------  --------------------------  ---------------------------
+EOS
+
+    gossip.each do |address, timestamp, data|
+      t =  Time.at(timestamp.slice(0, 10).to_i, timestamp.slice(10, -1).to_i)
+      puts '%-15s  %19s.%06d  %s' % [address, t.strftime('%Y/%m/%d %H:%M:%S'), t.usec , data]
+    end
+  when /\A\s*data\s+(.+)\s*\Z/
+    gossip.data = $1
+  when /\A\s*add\s+(.+)\s*\Z/
+    begin
+      gossip.add_node $1
+    rescue => e
+      $stderr.puts e
+    end
+  when /\A\s*del\s+(.+)\s*\Z/
+    gossip.delete_node $1
+  when /\A\s*clear\s*\Z/
+    gossip.clear_dead_list
+  when /\A\s*log\s*\Z/
+    puts [:debug, :info, :warn, :error, :fatal][gossip.logger.level]
+  when /\A\s*log\s+(.+)\s*\Z/
+    begin
+      gossip.logger.level = Logger.const_get($1.upcase)
+    rescue NameError => e
+      $stderr.puts e
+    end
+  when /\A\s*exit\s*\Z/
+    exit
+  else
+    puts "commands: #{commands.join '|'}"
+  end
+end

@@ -44,8 +44,10 @@ module RGossip2
     def initialize(options = {})
       unless @auth_key = options[:auth_key]
         raise ':auth_key is required'
-        
       end
+
+      default_logger = Logger.new($stderr)
+      default_logger.level = Logger::INFO
 
       defaults = {
         :port             => 10870,
@@ -56,7 +58,7 @@ module RGossip2
         :receive_timeout  => 3,
         :digest_algorithm => OpenSSL::Digest::SHA256,
         :digest_length    => 32, # 256 / 8
-        :logger           => Logger.new($stderr),
+        :logger           => default_logger,
         :callback_handler => nil,
       }
 

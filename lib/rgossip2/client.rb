@@ -84,11 +84,8 @@ module RGossip2
 
       @gossiper.stop
       @receiver.stop
-
-      @gossiper = nil
-      @receiver = nil
     ensure
-      @running = true
+      @running = false
     end
 
     def join
@@ -177,8 +174,19 @@ module RGossip2
     # ノードを舐める
     def each
       @node_list.each do |node|
-        yield([node.address, node.timestamp, node.data])
+        address = node.address.dup
+        timestamp = node.timestamp.dup
+
+        if data = node.data
+          data = data.dup
+        end
+
+        yield([address, timestamp, data])
       end
+    end
+
+    def logger
+      @context.logger
     end
 
     private
