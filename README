@@ -1,0 +1,69 @@
+= rgossip
+
+== Description
+
+Basic implementation of a gossip protocol.
+
+This is a porting of Java implementation.
+
+see http://code.google.com/p/gossip-protocol-java/
+
+== Install
+
+gem install rgossip2
+
+== Example
+
+  require 'rubygems'
+  require 'rgossip2'
+  
+  gossip = RGossip2.client(
+    :initial_nodes => ['10.150.174.161', '10.150.185.250', '10.150.174.30'],
+    :auth_key => 'onion'
+  )
+  
+  gossip.data = 'Node 01: data'
+  gossip.start
+  #gossip.join
+  
+  loop do
+    case gets
+    when /list/i
+      gossip.each do |address, timestamp, data|
+        puts "#{address}: #{data}"
+        # (example output)
+        # 10.150.174.161: node-1
+        # 10.150.174.30: node-3
+        # 10.150.185.250: node-2
+      end
+    when /^add\s+(.+)$/
+      gossip.add_node $1
+    end
+  end
+
+== Command-line interface
+
+  shell> gossip
+  I, [2011-10-30T22:41:05.975084 #2282]  INFO -- : Client is initialized: initial_nodes=[], address=10.142.43.53, data=nil
+  gossip> add ip-10-142-30-230
+  gossip> list
+  IP Address       Timestamp                   Data
+  ---------------  --------------------------  ---------------------------
+  10.142.43.53     2011/10/30 22:41:05.000000
+  10.142.24.230    1970/01/01 09:00:00.000000
+  gossip> start
+  I, [2011-10-30T22:41:22.083898 #2282]  INFO -- : Client is started: address=10.142.43.53
+  I, [2011-10-30T22:41:22.084197 #2282]  INFO -- : Transmission was started: interval=0.1, port=10870
+  I, [2011-10-30T22:41:22.084580 #2282]  INFO -- : Reception is started: port=10870
+  gossip> list
+  IP Address       Timestamp                   Data
+  ---------------  --------------------------  ---------------------------
+  10.142.43.53     2011/10/30 22:41:24.000000
+  10.142.24.230    2011/10/30 22:41:23.000000
+  gossip> data my data
+  gossip> list
+  IP Address       Timestamp                   Data
+  ---------------  --------------------------  ---------------------------
+  10.142.43.53     2011/10/30 22:41:30.000000  my data
+  10.142.24.230    2011/10/30 22:41:30.000000
+
