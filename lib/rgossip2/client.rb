@@ -27,7 +27,7 @@ module RGossip2
 
     def initialize(initial_nodes = [], address = nil, data = nil)
       # データがバッファサイズを超える場合はエラー
-      raise 'too large data' if data && data.length > @context.buffer_size
+      raise 'Data is too large' if data && data.length > @context.buffer_size
 
       # IPアドレスを取得。デフォルトはローカルホストアドレス
       @address = name2addr(address || IPSocket.getaddress(Socket.gethostname))
@@ -119,7 +119,7 @@ module RGossip2
       @node_list.synchronize {
         @dead_list.synchronize {
           # すでに存在する場合はエラー
-          raise 'node is exist' if @node_list.any? {|i| i.address == address }
+          raise 'The node already exists' if @node_list.any? {|i| i.address == address }
 
           node = @context.create(Node, @node_list, @dead_list, address, nil, nil)
           @node_list << node
@@ -141,7 +141,7 @@ module RGossip2
       address = name2addr(address)
 
       # 自分自身は削除できない
-      raise 'cannot delete own node' if @self_node.address == address
+      raise 'Own node cannot be deleted' if @self_node.address == address
 
       @node_list.synchronize {
         @dead_list.synchronize {

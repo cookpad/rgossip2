@@ -47,6 +47,10 @@ module RGossip2
       options.each {|k, v| tmp[k.to_sym] = v }
       options = tmp
 
+      unless options.has_key?(:auth_key)
+        raise ':auth_key is required'
+      end
+
       defaults = {
         :port             => 10870,
         :buffer_size      => 512,
