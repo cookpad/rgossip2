@@ -12,16 +12,16 @@ module RGossip2
   #                         +-----------------------+
   #
   class Gossiper
+    include ContextHelper
 
-    attr_writer :context
-
-    def initialize(self_node, node_list)
+    def initialize(context, self_node, node_list)
+      @context = context
       @self_node = self_node
       @node_list = node_list
     end
 
     def start
-      @context.info("Transmission was started: interval=#{@context.gossip_interval}, port=#{@context.port}")
+      info("Transmission was started: interval=#{@context.gossip_interval}, port=#{@context.port}")
 
       @running = true
 
@@ -34,7 +34,7 @@ module RGossip2
             begin
               @node_list.synchronize { gossip(sock) }
             rescue Exception => e
-              @context.handle_error(e)
+              handle_error(e)
             end
 
             sleep(@context.gossip_interval)
@@ -46,7 +46,7 @@ module RGossip2
     end # start
 
     def stop
-      @context.info("Transmission was stopped")
+      info("Transmission was stopped")
 
       # フラグをfalseにしてスレッドを終了させる
       @running = false
@@ -67,7 +67,7 @@ module RGossip2
       dest = @node_list.choose_except(@self_node)
       return unless dest # ないとは思うけど…
 
-      @context.debug("Data is transmitted: address=#{dest.address}")
+      debug("Data is transmitted: address=#{dest.address}")
 
       # チャンクに分けてデータを送信
       @node_list.serialize.each do |chunk|

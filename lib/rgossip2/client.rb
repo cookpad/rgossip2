@@ -18,46 +18,50 @@ module RGossip2
   #
   class Client
     include Enumerable
+    include ContextHelper
 
     attr_reader :node_list
     attr_reader :dead_list
     attr_reader :self_node
 
-    attr_accessor :context
+    attr_reader :context
 
-    def initialize(initial_nodes = [], address = nil, data = nil)
+    def initialize(context, initial_nodes = [], address = nil, data = nil)
+      @context = context
+
       # データがバッファサイズを超える場合はエラー
-      raise 'Data is too large' if data && data.length > @context.buffer_size
+      if data and data.length > @context.buffer_size
+        raise 'Data is too large'
+      end
 
       # IPアドレスを取得。デフォルトはローカルホストアドレス
       @address = name2addr(address || IPSocket.getaddress(Socket.gethostname))
-
-      @context.info("Client is initialized: initial_nodes=#{initial_nodes.inspect}, address=#{@address}, data=#{data.inspect}")
+      info("Client is initialized: initial_nodes=#{initial_nodes.inspect}, address=#{@address}, data=#{data.inspect}")
 
       # NodeListを生成
-      @node_list = @context.create(Nodes)
-      @dead_list = @context.create(Nodes)
+      @node_list = create(NodeList)
+      @dead_list = create(NodeList)
 
       # Nodeを生成
-      @self_node = @context.create(Node, @node_list, @dead_list, @address, data, nil)
+      @self_node = create(Node, @node_list, @dead_list, @address, data, nil)
       @self_node.update_timestamp
       @node_list << @self_node
 
       # 初期ノードを追加
       initial_nodes.uniq.each do |i|
-        @node_list << @context.create(Node, @node_list, @dead_list, name2addr(i), nil, nil)
+        @node_list << create(Node, @node_list, @dead_list, name2addr(i), nil, nil)
       end
 
       # Gossiper、Receiverを生成
-      @gossiper = @context.create(Gossiper, @self_node, @node_list)
-      @receiver = @context.create(Receiver, @self_node, @node_list, @dead_list)
+      @gossiper = create(Gossiper, @self_node, @node_list)
+      @receiver = create(Receiver, @self_node, @node_list, @dead_list)
     end
 
     def start
       # 開始している場合はスキップ
       return if @running
 
-      @context.info("Client is started: address=#{@address}")
+      info("Client is started: address=#{@address}")
 
       # NodoのTimerをスタート
       @node_list.each do |node|
@@ -76,7 +80,7 @@ module RGossip2
       # 停止している場合はスキップ
       return unless @running
 
-      @context.info("Client is stopped")
+      info("Client is stopped")
 
       @gossiper.stop
       @receiver.stop
@@ -121,7 +125,7 @@ module RGossip2
           # すでに存在する場合はエラー
           raise 'The node already exists' if @node_list.any? {|i| i.address == address }
 
-          node = @context.create(Node, @node_list, @dead_list, address, nil, nil)
+          node = create(Node, @node_list, @dead_list, address, nil, nil)
           @node_list << node
 
           # デッドリストからは追加したノードを削除
@@ -131,7 +135,7 @@ module RGossip2
 
           node.start_timer if @running
 
-          @context.callback(:add, address, nil, nil)
+          callback(:add, address, nil, nil)
         }
       }
     end
@@ -158,7 +162,7 @@ module RGossip2
             i.address == address
           end
 
-          @context.callback(:delete, address, nil, nil)
+          callback(:delete, address, nil, nil)
         }
       }
     end

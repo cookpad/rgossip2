@@ -16,7 +16,7 @@ module RGossip2
     # バッファサイズと遊び
     # 「buffer_size * allowance + digest_length」が 65515bytes 以下になるようにする
     attr_accessor :buffer_size
-    attr_accessor :attr_accessor
+    attr_accessor :allowance
 
     # ハッシュ関数のアルゴリズムと長さ
     attr_accessor :digest_algorithm
@@ -42,13 +42,9 @@ module RGossip2
     attr_accessor :error_handler
 
     def initialize(options = {})
-      # ハッシュのキーをシンボルに変換
-      tmp = {}
-      options.each {|k, v| tmp[k.to_sym] = v }
-      options = tmp
-
-      unless options.has_key?(:auth_key)
+      unless @auth_key = options[:auth_key]
         raise ':auth_key is required'
+        
       end
 
       defaults = {
@@ -78,46 +74,6 @@ module RGossip2
         self.instance_variable_set("@#{k}", options.fetch(k, v))
       end
     end # initialize
-
-    # 他のクラスのインスタンスを生成して自分自身をセットする
-    def create(klass, *args)
-      obj = klass.new(*args)
-      obj.context = self
-      return obj
-    end
-
-    # 各種ハンドラプロキシメソッド
-    def callback(action, address, timestamp, data)
-      if self.callback_handler
-        self.callback_handler.call([action, address, timestamp, data])
-      end
-    end
-
-    def handle_error(e)
-      if self.error_handler
-        self.error_handler.call(e)
-      else
-        raise e
-      end
-    end
-
-    # ノード情報群からハッシュ値とメッセージを生成する
-    def digest_and_message(nodes)
-      message = nodes.map {|i| i.to_a }.to_msgpack
-      hash = OpenSSL::HMAC::digest(self.digest_algorithm.new, self.auth_key, message)
-      [hash, message]
-    end
-
-    # ロギングプロキシメソッド
-    [:fatal, :error, :worn, :info, :debug].each do |name|
-      define_method(name) do |message|
-        if self.logger
-          self.logger.send(name, message)
-        else
-          $stderr.puts("#{name}: #{message}")
-        end
-      end
-    end
 
   end # Context
 

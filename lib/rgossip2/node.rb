@@ -18,15 +18,17 @@ module RGossip2
   # +------------+                              +---------+
   #
   class Node
+    include ContextHelper
+
     attr_reader   :address
     attr_accessor :timestamp
     attr_accessor :data
 
-    attr_writer :context
-
     # クラスの生成・初期化はContextクラスからのみ行う
     # addressはユニークであること
-    def initialize(node_list, dead_list, address, data, timestamp)
+    def initialize(context, node_list, dead_list, address, data, timestamp)
+      @context = context
+
       @node_list = node_list
       @dead_list = dead_list
       @address = address
@@ -36,7 +38,7 @@ module RGossip2
       # node_lifetimeの時間内に更新されない場合
       # TimerがNodeを破棄する
       @timer = Timer.new(@context.node_lifetime) do
-        @context.debug("Node timed out: address=#{@address}")
+        debug("Node timed out: address=#{@address}")
 
         # ノードリストからNodeを削除
         @node_list.synchronize {
@@ -57,7 +59,7 @@ module RGossip2
         }
 
         # 破棄時の処理をコールバック
-        @context.callback(:delete, @address, @timestamp, @data)
+        callback(:delete, @address, @timestamp, @data)
       end
     end
 
@@ -74,17 +76,17 @@ module RGossip2
     alias to_ary to_a
 
     def start_timer
-      @context.debug("Node timer is started: address=#{@address}")
+      debug("Node timer is started: address=#{@address}")
       @timer.start
     end
 
     def reset_timer
-      @context.debug("Node timer is reset: address=#{@address}")
+      debug("Node timer is reset: address=#{@address}")
       @timer.reset
     end
 
     def stop_timer
-      @context.debug("Node timer is suspended: address=#{@address}")
+      debug("Node timer is suspended: address=#{@address}")
       @timer.stop
     end
 

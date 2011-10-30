@@ -15,13 +15,12 @@ module RGossip2
   # +------------+
   #
   class NodeList < Array
+    include ContextHelper
     include Mutex_m
 
-    attr_writer :context
-
-    # クラスの生成・初期化はContextクラスからのみ行う
-    def initialize(ary = [])
+    def initialize(context, ary = [])
       super(ary)
+      @context = context
     end
 
     # 指定したNode以外のNodeをリストからランダムに選択する
@@ -49,7 +48,7 @@ module RGossip2
           nodes << node
           datasum << packed
         else
-          chunks << @context.digest_and_message(nodes).join
+          chunks << digest_and_message(nodes).join
           nodes.clear
           datasum.replace('')
 
@@ -60,7 +59,7 @@ module RGossip2
 
       # 残りのNodeをチャンクに追加
       unless nodes.empty?
-        chunks << @context.digest_and_message(nodes).join
+        chunks << digest_and_message(nodes).join
       end
 
       return chunks
