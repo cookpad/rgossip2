@@ -21,7 +21,7 @@ module RGossip2
     end
 
     def start
-      info("Transmission was started: interval=#{@context.gossip_interval}, port=#{@context.port}")
+      info("Transmission was started: interval=#{@context.gossip_interval} port=#{@context.port}")
 
       @running = true
 
