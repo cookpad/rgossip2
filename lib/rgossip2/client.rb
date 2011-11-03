@@ -45,11 +45,12 @@ module RGossip2
       # Nodeを生成
       @self_node = create(Node, @node_list, @dead_list, @address, data, nil)
       @self_node.update_timestamp
-      @node_list << @self_node
+      @node_list[@address] = @self_node
 
       # 初期ノードを追加
       initial_nodes.uniq.each do |i|
-        @node_list << create(Node, @node_list, @dead_list, name2addr(i), nil, nil)
+        addr = name2addr(i)
+        @node_list[addr] = create(Node, @node_list, @dead_list, addr, nil, nil)
       end
 
       # Gossiper、Receiverを生成
@@ -120,15 +121,13 @@ module RGossip2
       @node_list.synchronize {
         @dead_list.synchronize {
           # すでに存在する場合はエラー
-          raise 'The node already exists' if @node_list.any? {|i| i.address == address }
+          raise 'The node already exists' if @node_list[address]
 
           node = create(Node, @node_list, @dead_list, address, nil, nil)
-          @node_list << node
+          @node_list[address] = node
 
           # デッドリストからは追加したノードを削除
-          @dead_list.reject! do |i|
-            i.address == address
-          end
+          @dead_list.delete(address)
 
           node.start_timer if @running
 
@@ -146,18 +145,13 @@ module RGossip2
 
       @node_list.synchronize {
         @dead_list.synchronize {
-          # ノードリストから削除しつつ、Timerを止める
-          @node_list.reject! do |i|
-            if i.address == address
-              i.stop_timer
-              true
-            end
-          end
+          # ノードリストから削除してTimerを止める
+          node = @node_list.delete(address)
+          node.stop_timer if node
 
           # デッドリストからも削除
-          @dead_list.reject! do |i|
-            i.address == address
-          end
+          node = @dead_list.delete(address)
+          node.stop_timer if node
 
           callback(:delete, address, nil, nil)
         }

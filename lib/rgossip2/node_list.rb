@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'mutex_m'
 require 'openssl'
 
@@ -14,18 +15,33 @@ module RGossip2
   # |  Receiver  |<>---+
   # +------------+
   #
-  class NodeList < Array
+  class NodeList
     include ContextHelper
     include Mutex_m
 
-    def initialize(context, ary = [])
-      super(ary)
+    def initialize(context)
       @context = context
+      @nodes = {}
+    end
+
+    # Hashに委譲
+    def_delegators :@nodes, :[], :[]=, :delete
+
+    # Nodeの配列でイテレートする
+    def each
+      @nodes..values.each do |i|
+        yield(i)
+      end
     end
 
     # 指定したNode以外のNodeをリストからランダムに選択する
     def choose_except(node)
-      node_list = self.select {|i| i.address != node.address }
+      node_list = []
+
+      @node_list.each do |k, v|
+        node_list << v if k != node.address
+      end
+
       node_list.empty? ? nil : node_list[rand(node_list.size)]
     end
 
@@ -39,7 +55,7 @@ module RGossip2
       bufsiz = @context.buffer_size - @context.digest_length
 
       # Nodeはランダムな順序に変換
-      self.sort_by { rand }.each do |node|
+      @nodes.sort_by { rand }.each do |addr, node|
         # 長さを知るためにシリアライズ
         packed = node.serialize
 

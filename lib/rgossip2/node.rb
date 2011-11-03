@@ -42,20 +42,12 @@ module RGossip2
 
         # ノードリストからNodeを削除
         @node_list.synchronize {
-          @node_list.reject! do |i|
-            i.address == @address
-          end
+          @node_list.delete(@address)
         }
 
         # デッドリストにNodeを追加
         @dead_list.synchronize {
-          # すでに存在する場合は削除
-          # （データのアップデートを考えると削除はしておいた方がよい？）
-          @dead_list.reject! do |i|
-            i.address == @address
-          end
-
-          @dead_list << self
+          @dead_list[@address] = self
         }
 
         # 破棄時の処理をコールバック

@@ -98,7 +98,7 @@ module RGossip2
         next if address == @self_node.address
 
         # ノードリストからアドレスの一致するNodeを探す
-        if (node = @node_list.find {|i| i.address == address })
+        if (node = @node_list[address])
           # ノードリストに見つかった場合
 
           # 受信したNodeのタイムスタンプが新しければ
@@ -112,18 +112,16 @@ module RGossip2
 
             callback(:update, address, timestamp, data)
           end
-        elsif (index = @dead_list.synchronize { @dead_list.index {|i| i.address == address } })
+        elsif (node = @dead_list.synchronize { @dead_list[address] })
           # デッドリストに見つかった場合
           @dead_list.synchronize {
-            node = @dead_list[index]
-
             # 受信したNodeのタイムスタンプが新しければ
             # デッドリストのノードを復活させる
             if timestamp > node.timestamp
               debug("Node revived: address=#{address} timestamp=#{timestamp}")
 
-              @dead_list.delete_at(index)
-              @node_list << node
+              @dead_list.delete(address)
+              @node_list[address] = node
               node.start_timer
 
               callback(:comeback, address, timestamp, data)
@@ -134,7 +132,7 @@ module RGossip2
           debug("Node was added: address=#{address} timestamp=#{timestamp}")
 
           node = create(Node, @node_list, @dead_list, address, data, timestamp)
-          @node_list << node
+          @node_list[address] = node
           node.start_timer
 
           callback(:add, address, timestamp, data)
