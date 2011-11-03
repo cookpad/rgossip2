@@ -1,6 +1,6 @@
 require 'forwardable'
-require 'mutex_m'
 require 'openssl'
+require 'thread'
 
 module RGossip2
 
@@ -17,11 +17,12 @@ module RGossip2
   #
   class NodeList
     include ContextHelper
-    include Mutex_m
+    extend Forwardable
 
     def initialize(context)
       @context = context
       @nodes = {}
+      @mutex = Mutex.new
     end
 
     # Hashに委譲
@@ -29,8 +30,15 @@ module RGossip2
 
     # Nodeの配列でイテレートする
     def each
-      @nodes..values.each do |i|
+      @nodes.values.each do |i|
         yield(i)
+      end
+    end
+
+    # Mutex_mだとエラーになるので自前で定義
+    def synchronize
+      @mutex.synchronize do
+        yield
       end
     end
 
@@ -38,7 +46,7 @@ module RGossip2
     def choose_except(node)
       node_list = []
 
-      @node_list.each do |k, v|
+      @nodes.each do |k, v|
         node_list << v if k != node.address
       end
 
