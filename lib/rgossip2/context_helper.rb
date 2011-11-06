@@ -20,15 +20,34 @@ module RGossip2
     # 各種ハンドラプロキシメソッド
     def callback(action, address, timestamp, data)
       if @context.callback_handler
-        @context.callback_handler.yield([action, address, timestamp, data])
+        __proc_yield_protect__(@context.callback_handler, action, address, timestamp, data)
       end
     end
 
     def handle_error(e)
       if @context.error_handler
-        @context.error_handler.yield(e)
+        __proc_yield_protect__(@context.error_handler, e)
       else
         raise e
+      end
+    end
+
+    def __proc_yield_protect__(proc, *args)
+      case proc.arity
+      when 0
+        proc.call
+      when 1
+        proc.call((args.length < 2) ? args.first : args)
+      else
+        proc.call(*args)
+      end
+    rescue Exception => e
+      message = (["#{e.class}: #{e.message}"] + (e.backtrace || [])).join("\n\tfrom ")
+
+      if @context.logger
+        @context.logger.error(message)
+      else
+        $stderr.puts(message)
       end
     end
 
