@@ -20,13 +20,13 @@ module RGossip2
     # 各種ハンドラプロキシメソッド
     def callback(action, address, timestamp, data)
       if @context.callback_handler
-        @context.callback_handler.call([action, address, timestamp, data])
+        @context.callback_handler.yield([action, address, timestamp, data])
       end
     end
 
     def handle_error(e)
       if @context.error_handler
-        @context.error_handler.call(e)
+        @context.error_handler.yield(e)
       else
         raise e
       end
