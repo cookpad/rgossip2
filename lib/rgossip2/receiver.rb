@@ -65,7 +65,8 @@ module RGossip2
       return unless select([sock], [], [], @context.receive_timeout)
       message, (afam, port, host, ip) = sock.recvfrom(@context.buffer_size * @context.allowance)
 
-      debug("Data was received: from=#{ip}")
+      # 意図的にコメントアウト
+      #debug("Data was received: from=#{ip}")
 
       recv_nodes = unpack_message(message)
 
@@ -75,7 +76,9 @@ module RGossip2
         }
       else
         # データが取得できなかった場合は無効なデータとして処理
-        debug("Invalid data was received: from=#{ip}")
+
+        # 意図的にコメントアウト
+        #debug("Invalid data was received: from=#{ip}")
       end
     rescue Exception => e
       handle_error(e)
@@ -104,7 +107,8 @@ module RGossip2
           # 受信したNodeのタイムスタンプが新しければ
           # 持っているNodeを更新
           if timestamp > node.timestamp
-            debug("The node was updated: address=#{address} timestamp=#{timestamp}")
+            # 意図的にコメントアウト
+            #debug("The node was updated: address=#{address} timestamp=#{timestamp}")
 
             node.timestamp = timestamp
             node.data = data
@@ -118,7 +122,8 @@ module RGossip2
             # 受信したNodeのタイムスタンプが新しければ
             # デッドリストのノードを復活させる
             if timestamp > node.timestamp
-              debug("Node revived: address=#{address} timestamp=#{timestamp}")
+              # 意図的にコメントアウト
+              #debug("Node revived: address=#{address} timestamp=#{timestamp}")
 
               @dead_list.delete(address)
               @node_list[address] = node
@@ -129,7 +134,9 @@ module RGossip2
           }
         else
           # リストにない場合はNodeを追加
-          debug("Node was added: address=#{address} timestamp=#{timestamp}")
+
+          # 意図的にコメントアウト
+          #debug("Node was added: address=#{address} timestamp=#{timestamp}")
 
           node = create(Node, @node_list, @dead_list, address, data, timestamp)
           @node_list[address] = node

@@ -67,7 +67,8 @@ module RGossip2
       dest = @node_list.choose_except(@self_node)
       return unless dest # ないとは思うけど…
 
-      debug("Data is transmitted: address=#{dest.address}")
+      # 意図的にコメントアウト
+      #debug("Data is transmitted: address=#{dest.address}")
 
       # チャンクに分けてデータを送信
       @node_list.serialize.each do |chunk|
