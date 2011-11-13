@@ -103,14 +103,16 @@ module RGossip2
     end
 
     def data
-      @node_list.synchronize {
-        @self_node.data
-      }
+      @self_node.data
     end
 
     def data=(v)
+      @self_node.data = v
+    end
+
+    def transaction
       @node_list.synchronize {
-        @self_node.data = v
+        yield
       }
     end
 
