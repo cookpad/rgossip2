@@ -73,7 +73,9 @@ module RGossip2
     end
 
     def reset_timer
-      debug("Node timer is reset: address=#{@address}")
+      # 意図的にコメントアウト
+      #debug("Node timer is reset: address=#{@address}")
+      @timer.timeout = @context.node_lifetime
       @timer.reset
     end
 

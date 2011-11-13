@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name              = 'rgossip2'
-  spec.version           = '0.1.4'
+  spec.version           = '0.1.5'
   spec.summary           = 'Basic implementation of a gossip protocol. This is a porting of Java implementation. see http://code.google.com/p/gossip-protocol-java/'
   spec.require_paths     = %w(lib)
   spec.files             = %w(README) + Dir.glob('bin/**/*') + Dir.glob('lib/**/*')

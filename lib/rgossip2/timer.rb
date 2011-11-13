@@ -11,6 +11,8 @@ module RGossip2
   #
   class Timer
 
+    attr_accessor :timeout
+
     def initialize(timeout, &block)
       @timeout = timeout
       @block = block
