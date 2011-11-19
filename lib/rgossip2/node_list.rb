@@ -26,7 +26,7 @@ module RGossip2
     end
 
     # Hashに委譲
-    def_delegators :@nodes, :[], :[]=, :delete
+    def_delegators :@nodes, :[], :[]=, :delete, :clear
 
     # Nodeの配列でイテレートする
     def each
