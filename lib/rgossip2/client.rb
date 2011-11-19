@@ -162,9 +162,14 @@ module RGossip2
 
     # デッドリストのクリーニング
     def clear_dead_list
+      dead_list_len = 0
+
       @dead_list.synchronize {
+        dead_list_len = @dead_list.length
         @dead_list.clear
       }
+
+      return dead_list_len
     end
 
     # ノードを舐める
