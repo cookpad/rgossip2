@@ -111,10 +111,11 @@ module RGossip2
             #debug("The node was updated: address=#{address} timestamp=#{timestamp}")
 
             node.timestamp = timestamp
+            old_data = node.data
             node.data = data
             node.reset_timer
 
-            callback(:update, address, timestamp, data)
+            callback(:update, address, timestamp, data, old_data)
           end
         elsif (node = @dead_list.synchronize { @dead_list[address] })
           # デッドリストに見つかった場合
@@ -126,10 +127,16 @@ module RGossip2
               #debug("Node revived: address=#{address} timestamp=#{timestamp}")
 
               @dead_list.delete(address)
+
+              # データの更新を忘れずに
+              node.timestamp = timestamp
+              old_data = node.data
+              node.data = data
+
               @node_list[address] = node
               node.start_timer
 
-              callback(:comeback, address, timestamp, data)
+              callback(:comeback, address, timestamp, data, old_data)
             end
           }
         else
@@ -142,7 +149,7 @@ module RGossip2
           @node_list[address] = node
           node.start_timer
 
-          callback(:add, address, timestamp, data)
+          callback(:add, address, timestamp, data, data)
         end
       end
     end # merge_lists

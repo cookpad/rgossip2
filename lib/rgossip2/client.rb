@@ -133,7 +133,7 @@ module RGossip2
 
           node.start_timer if @running
 
-          callback(:add, address, nil, nil)
+          callback(:add, address, nil, nil, nil)
         }
       }
     end
@@ -155,7 +155,7 @@ module RGossip2
           node = @dead_list.delete(address)
           node.stop_timer if node
 
-          callback(:delete, address, nil, nil)
+          callback(:delete, address, nil, nil, nil)
         }
       }
     end

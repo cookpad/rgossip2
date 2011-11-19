@@ -51,7 +51,7 @@ module RGossip2
         }
 
         # 破棄時の処理をコールバック
-        callback(:delete, @address, @timestamp, @data)
+        callback(:delete, @address, @timestamp, @data, @data)
       end
     end
 

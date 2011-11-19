@@ -18,9 +18,9 @@ module RGossip2
     end
 
     # 各種ハンドラプロキシメソッド
-    def callback(action, address, timestamp, data)
+    def callback(action, address, timestamp, data, old_data)
       if @context.callback_handler
-        __proc_yield_protect__(@context.callback_handler, action, address, timestamp, data)
+        __proc_yield_protect__(@context.callback_handler, action, address, timestamp, data, old_data)
       end
     end
 
