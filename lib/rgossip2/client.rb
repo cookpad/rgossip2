@@ -50,6 +50,8 @@ module RGossip2
       # 初期ノードを追加
       initial_nodes.uniq.each do |i|
         addr = name2addr(i)
+        # 自ノードはスキップ
+        next if addr == @address
         @node_list[addr] = create(Node, @node_list, @dead_list, addr, nil, nil)
       end
 
