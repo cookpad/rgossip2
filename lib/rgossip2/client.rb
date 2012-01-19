@@ -209,7 +209,7 @@ module RGossip2
       s.close
       return true
     rescue => e
-      @logger.debug("#{host}:#{port}: #{e.message}")
+      @context.logger.debug("#{host}:#{port}: #{e.message}")
       return false
     end
 
