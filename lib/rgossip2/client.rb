@@ -52,6 +52,8 @@ module RGossip2
         addr = name2addr(i)
         # 自ノードはスキップ
         next if addr == @address
+        # つながらない場合はスキップ
+        next unless connectable?(addr, @context.port)
         @node_list[addr] = create(Node, @node_list, @dead_list, addr, nil, nil)
       end
 
@@ -199,6 +201,16 @@ module RGossip2
       else
         IPSocket.getaddress(name)
       end
+    end
+
+    def connectable?(host, port)
+      s = UDPSocket.new
+      s.connect(host, port)
+      s.close
+      return true
+    rescue => e
+      @logger.debug("#{host}:#{port}: #{e.message}")
+      return false
     end
 
   end # Client
