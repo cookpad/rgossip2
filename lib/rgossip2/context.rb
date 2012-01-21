@@ -34,6 +34,9 @@ module RGossip2
     # 受信タイムアウト
     attr_accessor :receive_timeout
 
+    # 初期ノードのUDPスキャンのタイムアウト
+    attr_accessor :udp_timeout
+
     # ロガー
     attr_accessor :logger
 
@@ -59,6 +62,7 @@ module RGossip2
         :digest_algorithm => OpenSSL::Digest::SHA256,
         :digest_length    => 32, # 256 / 8
         :logger           => default_logger,
+        :udp_timeout      => 0.3,
         :callback_handler => nil,
       }
 

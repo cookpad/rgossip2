@@ -1,4 +1,5 @@
 require 'socket'
+require 'timeout'
 
 module RGossip2
 
@@ -206,9 +207,18 @@ module RGossip2
     def connectable?(host, port)
       s = UDPSocket.new
       s.connect(host, port)
-      s.close
+      s.send('', 0)
+
+      begin
+        timeout(@context.udp_timeout) do
+          s.recv(@context.buffer_size)
+        end
+      ensure
+        s.close
+      end
+
       return true
-    rescue => e
+    rescue Exception => e
       debug("#{host}:#{port}: #{e.message}")
       return false
     end
