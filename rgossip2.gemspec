@@ -9,4 +9,5 @@ Gem::Specification.new do |spec|
   spec.homepage          = 'https://bitbucket.org/winebarrel/rgossip2'
   spec.executables << 'gossip'
   spec.add_dependency('msgpack')
+  spec.add_dependency('rping', '>= 0.1.4')
 end

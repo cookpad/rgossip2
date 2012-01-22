@@ -37,6 +37,12 @@ module RGossip2
     # 初期ノードのUDPスキャンのタイムアウト
     attr_accessor :udp_timeout
 
+    # 初期ノードのpingチェックの有無
+    attr_accessor :ping_init_nodes
+    attr_accessor :ping_count
+    attr_accessor :ping_interval
+    attr_accessor :ping_timeout
+
     # ロガー
     attr_accessor :logger
 
@@ -63,6 +69,10 @@ module RGossip2
         :digest_length    => 32, # 256 / 8
         :logger           => default_logger,
         :udp_timeout      => 0.3,
+        :ping_init_nodes  => true,
+        :ping_count       => 3,
+        :ping_interval    => 0.1,
+        :ping_timeout     => 0.1,
         :callback_handler => nil,
       }
 

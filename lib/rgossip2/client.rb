@@ -1,5 +1,6 @@
 require 'socket'
 require 'timeout'
+require 'rping'
 
 module RGossip2
 
@@ -211,6 +212,13 @@ module RGossip2
     end
 
     def connectable?(host, port)
+      # フラグが立っている場合はpingもチェック
+      if @context.ping_init_nodes
+        ping_results = RPing.ping(host,
+          :count => @context.ping_count, :interval => @context.ping_interval, :timeout => @context.ping_timeout)
+        raise 'ping failed' if ping_results.all? {|i| i.nil? }
+      end
+
       s = UDPSocket.new
       s.connect(host, port)
       s.send('', 0)
