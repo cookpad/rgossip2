@@ -49,14 +49,20 @@ module RGossip2
       @node_list[@address] = @self_node
 
       # 初期ノードを追加
+      initial_nodes_threads = []
+
       initial_nodes.uniq.each do |i|
-        addr = name2addr(i)
-        # 自ノードはスキップ
-        next if addr == @address
-        # つながらない場合はスキップ
-        next unless connectable?(addr, @context.port)
-        @node_list[addr] = create(Node, @node_list, @dead_list, addr, nil, nil)
+        initial_nodes_threads << Thread.start(i) do |addr|
+          addr = name2addr(i)
+          # 自ノードはスキップ
+          next if addr == @address
+          # つながらない場合はスキップ
+          next unless connectable?(addr, @context.port)
+          @node_list[addr] = create(Node, @node_list, @dead_list, addr, nil, nil)
+        end
       end
+
+      initial_nodes_threads.each {|i| i.join }
 
       # Gossiper、Receiverを生成
       @gossiper = create(Gossiper, @self_node, @node_list)
@@ -213,13 +219,17 @@ module RGossip2
         timeout(@context.udp_timeout) do
           s.recv(@context.buffer_size)
         end
+      rescue Timeout::Error
       ensure
         s.close
       end
 
+      debug("#{host}(#{port}) is connectable")
+
       return true
     rescue Exception => e
-      debug("#{host}:#{port}: #{e.message}")
+      debug("#{host}(#{port}) is not connectable: #{e.message}")
+
       return false
     end
 
