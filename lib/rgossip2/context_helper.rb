@@ -63,9 +63,9 @@ module RGossip2
       name = level unless name
       define_method(name) do |message|
         if @context.logger
-          @context.logger.send(name, message)
+          @context.logger.send(level, message)
         else
-          $stderr.puts("#{name}: #{message}")
+          $stderr.puts("#{level}: #{message}")
         end
       end
     end
