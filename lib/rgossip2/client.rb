@@ -236,7 +236,7 @@ module RGossip2
 
       return true
     rescue Exception => e
-      debug("#{host}(#{port}) is not connectable: #{e.message}")
+      warning("#{host}(#{port}) is not connectable: #{e.message}")
 
       return false
     end

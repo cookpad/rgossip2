@@ -59,7 +59,8 @@ module RGossip2
     end
 
     # ロギングプロキシメソッド
-    [:fatal, :error, :worn, :info, :debug].each do |name|
+    [:fatal, :error, [:warn, :warning], :info, :debug].each do |level, name|
+      name = level unless name
       define_method(name) do |message|
         if @context.logger
           @context.logger.send(name, message)
