@@ -69,7 +69,7 @@ module RGossip2
         :digest_length    => 32, # 256 / 8
         :logger           => default_logger,
         :udp_timeout      => 0.3,
-        :ping_init_nodes  => true,
+        :ping_init_nodes  => false,
         :ping_count       => 3,
         :ping_interval    => 0.1,
         :ping_timeout     => 0.1,
