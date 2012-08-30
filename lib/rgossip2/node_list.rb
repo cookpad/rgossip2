@@ -15,6 +15,8 @@ module RGossip2
   # |  Receiver  |<>---+
   # +------------+
   #
+
+  class NodeListException < Exception; end
   class NodeList
     include ContextHelper
     extend Forwardable
@@ -66,6 +68,11 @@ module RGossip2
       @nodes.sort_by { rand }.each do |addr, node|
         # 長さを知るためにシリアライズ
         packed = node.serialize
+
+        # Prevent infinite loop when packed exceeds bufsiz. Loop happens because packed is never less than bufsize, therefor always triggering a redo.
+        if packed.length > bufsiz
+          raise NodeListException.new("serialized packed length (#{packed.length}) exceeds bufsiz (#{bufsiz})")
+        end
 
         # シリアライズしてバッファサイズ以下ならチャンクに追加
         if (datasum + packed).length <= bufsiz
