@@ -7,6 +7,8 @@ require 'optparse'
 require 'readline'
 require 'rgossip2'
 
+Version = '0.2.5'
+
 options = {:auth_key => 'onion'}
 
 ARGV.options do |opt|
