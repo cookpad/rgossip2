@@ -3,7 +3,7 @@ require 'rgossip2/context_helper'
 require 'rgossip2/client'
 require 'rgossip2/node'
 require 'rgossip2/node_list'
-require 'rgossip2/gossipper'
+require 'rgossip2/gossiper'
 require 'rgossip2/receiver'
 require 'rgossip2/timer'
 
