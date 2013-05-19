@@ -1,5 +1,8 @@
 require 'logger'
-require 'msgpack'
+#require 'msgpack'
+# for msgpack 0.5.5
+require 'msgpack/version'
+require 'msgpack/msgpack'
 require 'openssl'
 
 module RGossip2
